@@ -1,4 +1,5 @@
 import numpy as np
+import random
 
 class Perceptron(object):
 
@@ -15,7 +16,7 @@ class Perceptron(object):
     def fit(self, X, y):
 
         # initializing the weights to 0
-        self.w_ = np.zeros(1 + X.shape[1])
+        self.w_ = [random.uniform(-1.0, 1.0) for _ in range(1+X.shape[1])]
         self.errors_ = []
 
         print("Weights:", self.w_)
