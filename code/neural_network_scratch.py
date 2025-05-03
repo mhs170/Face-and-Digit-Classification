@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 import time
 from util import FixedRandom
 
-
-DATA_TYPE = "face"  
 MAX_ITERATIONS = 5
 RUNS_PER_PERCENTAGE = 5
 percentages = range(10, 101, 10)
@@ -33,8 +31,8 @@ def evaluate_accuracy(model, data, labels):
             correct += 1
     return round((correct / len(data)) * 100, 2)
 
-
-if DATA_TYPE == "digit":
+data_type = input("Enter data type (digit/face): ").strip().lower()
+if data_type == "digit":
     width, height = 28, 28
     train_img_path = '../data/digitdata/trainingimages'
     train_lbl_path = '../data/digitdata/traininglabels'
@@ -46,7 +44,7 @@ if DATA_TYPE == "digit":
     epochs = 5
     learn_rate = 0.01
     hidden_size = 20
-elif DATA_TYPE == "face":
+elif data_type == "face":
     width, height = 60, 70
     train_img_path = '../data/facedata/facedatatrain'
     train_lbl_path = '../data/facedata/facedatatrainlabels'
@@ -154,7 +152,7 @@ while True:
     o = 1 / (1 + np.exp(-o_pre))
 
     plt.imshow(raw_img, cmap="Greys")
-    if DATA_TYPE == "face":
+    if data_type == "face":
         prediction = "Face" if o.argmax() == 1 else "Not Face";
         answer = "Face" if train_labels[index].argmax() == 1 else "Not Face";
     else:

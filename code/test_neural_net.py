@@ -24,19 +24,16 @@ def evaluate_accuracy(model, data, labels):
     return round((correct / len(data)) * 100, 2)
 
 
-# Simulate the util.Counter structure
 class Counter(dict):
     def __getitem__(self, idx):
         self.setdefault(idx, 0)
         return dict.__getitem__(self, idx)
 
-# Create dummy binary data
 def create_dummy_data():
     width, height = 2, 1  # simple 2-feature input
     data = []
     labels = []
 
-    # Fake logic: if x > 0.5, it's a "face"
     for x, y, label in [(0, 0, 0), (1, 0, 1), (0, 1, 0), (1, 1, 1)]:
         datum = Counter()
         datum[(0, 0)] = x
