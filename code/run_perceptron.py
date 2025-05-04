@@ -5,7 +5,11 @@ import random
 import time
 import matplotlib.pyplot as plt
 
-DATA_TYPE = "face"  # Change to "face" for face data, change to "digit" for digit data
+
+DATA_TYPE = input("Enter dataset to run on ('digit' or 'face'): ").strip().lower()
+if DATA_TYPE not in ['digit', 'face']:
+    raise ValueError("Invalid input. Please enter 'digit' or 'face'.")
+
 MAX_ITERATIONS = 5
 RUNS_PER_PERCENTAGE = 5
 
@@ -17,19 +21,18 @@ if DATA_TYPE == "digit":
     test_img_path = '../data/digitdata/testimages'
     test_lbl_path = '../data/digitdata/testlabels'
     legal_labels = list(range(10))
-    num_train = 5000
-    num_test = 1000
 elif DATA_TYPE == "face":
     width, height = 60, 70
     train_img_path = '../data/facedata/facedatatrain'
     train_lbl_path = '../data/facedata/facedatatrainlabels'
     test_img_path = '../data/facedata/facedatatest'
     test_lbl_path = '../data/facedata/facedatatestlabels'
-    legal_labels = [0, 1]  # Face or not face
-    num_train = 451
-    num_test = 150
-else:
-    raise ValueError("Unsupported DATA_TYPE. Use 'digit' or 'face'.")
+    legal_labels = [0, 1]
+
+with open(train_lbl_path, 'r') as f:
+    num_train = len(f.readlines())
+with open(test_lbl_path, 'r') as f:
+    num_test = len(f.readlines())
 
 
 print("Loading data...")
@@ -49,15 +52,15 @@ for p in percentages:
     start_time = time.time()
 
     for _ in range(RUNS_PER_PERCENTAGE):
-        
+
         subset = random.sample(list(zip(train_data, train_labels)), size)
         subset_data, subset_labels = zip(*subset)
 
-        
+
         classifier = PerceptronClassifier(legal_labels, MAX_ITERATIONS)
         classifier.train(subset_data, subset_labels, [], [])
 
-        
+
         predictions = classifier.classify(test_data)
         acc = sum([pred == true for pred, true in zip(predictions, test_labels)]) / len(test_labels)
         scores.append(acc)
@@ -75,17 +78,18 @@ plt.figure(figsize=(10, 4))
 
 plt.subplot(1, 2, 1)
 plt.plot(percentages, avg_accuracies, marker='o')
-plt.title("Accuracy vs Training Data Size")
+plt.title(f"{DATA_TYPE.capitalize()} Accuracy vs Training Size")
 plt.xlabel("Training Size (%)")
 plt.ylabel("Average Accuracy")
 plt.grid(True)
 
 plt.subplot(1, 2, 2)
 plt.plot(percentages, train_times, marker='o', color='orange')
-plt.title("Training Time vs Training Data Size")
+plt.title(f"{DATA_TYPE.capitalize()} Training Time vs Training Size")
 plt.xlabel("Training Size (%)")
 plt.ylabel("Time (s)")
 plt.grid(True)
 
 plt.tight_layout()
+plt.savefig(f'../results/{DATA_TYPE}.png')
 plt.show()
