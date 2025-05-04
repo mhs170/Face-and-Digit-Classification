@@ -1,4 +1,3 @@
-
 from perceptron import PerceptronClassifier
 from data_loader import load_data
 import pickle
@@ -28,7 +27,32 @@ with open(weights_path, 'rb') as f:
 classifier = PerceptronClassifier(legal_labels, max_iterations=0)
 classifier.setWeights(saved_weights)
 
-print(f"\nPredictions on {DATA_TYPE} test set:")
-for i in range(5):
-    prediction = classifier.classify([test_data[i]])[0]
-    print(f"Sample {i+1}: Predicted = {prediction}, Actual = {test_labels[i]}")
+print("\nYou can now test the classifier on individual test images.")
+while True:
+    user_input = input(f"Enter test image index (0 to {len(test_data)-1}, or 'q' to quit): ").strip()
+    if user_input.lower() == 'q':
+        break
+
+    if not user_input.isdigit():
+        print("Invalid input. Please enter a number.")
+        continue
+
+    index = int(user_input)
+    if not (0 <= index < len(test_data)):
+        print("Index out of range.")
+        continue
+
+    datum = test_data[index]
+    true_label = test_labels[index]
+    prediction = classifier.classify([datum])[0]
+
+    # Print the image in ASCII
+    print("\nImage:")
+    for y in range(height):
+        row = ''
+        for x in range(width):
+            val = datum[(x, y)]
+            row += '#' if val > 0 else ' '
+        print(row)
+
+    print(f"Predicted: {prediction}, Actual: {true_label}\n")
