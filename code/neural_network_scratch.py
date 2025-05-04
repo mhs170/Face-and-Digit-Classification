@@ -75,6 +75,7 @@ test_labels = [label_to_one_hot(l, output_size) for l in test_labels]
 
 
 avg_accuracies = []
+std_accuracies = []
 avg_times = []
 rng = FixedRandom().random
 
@@ -93,15 +94,16 @@ for percent in percentages:
         w_h_o = np.random.uniform(-0.5, 0.5, (output_size, hidden_size))
         b_i_h = np.zeros((hidden_size, 1))
         b_h_o = np.zeros((output_size, 1))
-
+    
         for epoch in range(epochs):
             for img, label_vec in zip(subset_data, subset_labels):
+                #Forward pass
                 h_pre = b_i_h + w_i_h @ img 
                 h = 1 / (1 + np.exp(-h_pre))  
                 o_pre = b_h_o + w_h_o @ h 
                 o = 1 / (1 + np.exp(-o_pre))
 
-
+                #Back propagation
                 delta_o = o - label_vec
                 w_h_o += -learn_rate * delta_o @ h.T
                 b_h_o += -learn_rate * delta_o
@@ -115,7 +117,8 @@ for percent in percentages:
     
     duration = round(end - start, 2) 
     avg_acc = round(sum(scores) / len(scores), 2)   
-    print(f"  Avg Accuracy: {avg_acc:.2f}%, Time: {duration:.2f} sec")
+    std_acc = round(np.std(scores), 2)
+    print(f"  Avg Accuracy: {avg_acc:.2f}%, Std Dev: {std_acc:.2f}%, Time: {duration:.2f} sec")
     avg_accuracies.append(avg_acc)
     avg_times.append(duration)
 
@@ -123,7 +126,7 @@ plt.figure(figsize=(10, 4))
 
 plt.subplot(1, 2, 1)
 plt.plot(percentages, avg_accuracies, marker='o')
-plt.title("Avg Test Accuracy vs % Training Data")
+plt.title("Average Test Accuracy vs % Training Data")
 plt.xlabel("% Training Data Used")
 plt.ylabel("Average Accuracy (%)")
 plt.grid(True)
@@ -153,8 +156,8 @@ while True:
 
     plt.imshow(raw_img, cmap="Greys")
     if data_type == "face":
-        prediction = "Face" if o.argmax() == 1 else "Not Face";
-        answer = "Face" if train_labels[index].argmax() == 1 else "Not Face";
+        prediction = "Face" if o.argmax() == 1 else "Not Face"
+        answer = "Face" if train_labels[index].argmax() == 1 else "Not Face"
     else:
         prediction = o.argmax()
         answer = train_labels[index].argmax()
