@@ -81,8 +81,9 @@ def main():
         legal_labels = list(range(10))
         num_train = 5000
         num_test = 1000
-        epochs = 10
-        learn_rate = 0.001
+        epochs = 5
+        learn_rate = 0.01
+        hidden_size = 20
     elif data_type == "face":
         width, height = 60, 70
         train_img_path = '../data/facedata/facedatatrain'
@@ -92,8 +93,9 @@ def main():
         legal_labels = [0, 1]
         num_train = 451
         num_test = 150
-        epochs = 20
-        learn_rate = 0.001
+        hidden_size = 20
+        epochs = 10
+        learn_rate = 0.02
     else:
         raise ValueError("Unsupported data type.")
 
@@ -108,6 +110,7 @@ def main():
 
     percentages = list(range(10, 101, 10))
     avg_accuracies = []
+    std_accuracies = []
     avg_times = []
 
     for pct in percentages:
@@ -129,20 +132,25 @@ def main():
             optimizer = optim.Adam(model.parameters(), lr=learn_rate)
 
             acc = train_and_evaluate(model, train_loader, test_loader, criterion, optimizer, device, epochs)
-            accs.append(acc)
+            accs.append(acc * 100)
         end = time.time()
         duration = round(end - start, 2)
-        avg_acc = round(sum(accs) / len(accs) * 100, 2)
+        avg_acc = round(np.mean(accs), 2)
+        std_acc = round(np.std(accs), 2)  # Already in percentage since accs is multiplied above
 
-        print(f"  Avg Accuracy: {avg_acc:.2f}%, Time: {duration:.2f} sec")
+        print(f"  Avg Accuracy: {avg_acc:.2f}%, Std Dev: {std_acc:.2f}%, Time: {duration:.2f} sec")
         avg_accuracies.append(avg_acc)
+        std_accuracies.append(std_acc)
         avg_times.append(duration)
-    print(f"Total time for all runs: {sum(avg_times):.2f} sec")
+
+
+    
     # Plot results
     plt.figure(figsize=(10, 4))
+
     plt.subplot(1, 2, 1)
     plt.plot(percentages, avg_accuracies, marker='o')
-    plt.title("Avg Test Accuracy vs % Training Data (PyTorch)")
+    plt.title("Average Test Accuracy vs % Training Data (PyTorch)")
     plt.xlabel("% Training Data Used")
     plt.ylabel("Average Accuracy (%)")
     plt.grid(True)
@@ -156,6 +164,8 @@ def main():
 
     plt.tight_layout()
     plt.show()
+    plt.show()
+
 
     # Visualization loop
     while True:
