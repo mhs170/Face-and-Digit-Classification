@@ -10,7 +10,7 @@ if DATA_TYPE == 'digit':
     test_lbl_path = '../data/digitdata/testlabels'
 elif DATA_TYPE == 'face':
     legal_labels = [0, 1]
-    width, height = 60, 70
+    width, height =     60, 70
     test_img_path = '../data/facedata/facedatatest'
     test_lbl_path = '../data/facedata/facedatatestlabels'
 else:
