@@ -108,6 +108,7 @@ def main():
 
     percentages = list(range(10, 101, 10))
     avg_accuracies = []
+    std_accuracies = []
     avg_times = []
 
     for pct in percentages:
@@ -129,20 +130,25 @@ def main():
             optimizer = optim.Adam(model.parameters(), lr=learn_rate)
 
             acc = train_and_evaluate(model, train_loader, test_loader, criterion, optimizer, device, epochs)
-            accs.append(acc)
+            accs.append(acc * 100)
         end = time.time()
         duration = round(end - start, 2)
-        avg_acc = round(sum(accs) / len(accs) * 100, 2)
+        avg_acc = round(np.mean(accs), 2)
+        std_acc = round(np.std(accs), 2)  # Already in percentage since accs is multiplied above
 
-        print(f"  Avg Accuracy: {avg_acc:.2f}%, Time: {duration:.2f} sec")
+        print(f"  Avg Accuracy: {avg_acc:.2f}%, Std Dev: {std_acc:.2f}%, Time: {duration:.2f} sec")
         avg_accuracies.append(avg_acc)
+        std_accuracies.append(std_acc)
         avg_times.append(duration)
 
+
+    
     # Plot results
     plt.figure(figsize=(10, 4))
+
     plt.subplot(1, 2, 1)
     plt.plot(percentages, avg_accuracies, marker='o')
-    plt.title("Avg Test Accuracy vs % Training Data (PyTorch)")
+    plt.title("Average Test Accuracy vs % Training Data (PyTorch)")
     plt.xlabel("% Training Data Used")
     plt.ylabel("Average Accuracy (%)")
     plt.grid(True)
@@ -156,6 +162,8 @@ def main():
 
     plt.tight_layout()
     plt.show()
+    plt.show()
+
 
     # Visualization loop
     while True:
@@ -193,6 +201,9 @@ def main():
 
         plt.title(f"Prediction: {prediction}, Answer: {answer}")
         plt.show()
+
+if __name__ == '__main__':
+    main()
 
 if __name__ == '__main__':
     main()
