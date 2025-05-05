@@ -29,7 +29,6 @@ def evaluate_model(data_type):
     classifier.setWeights(weights)
     predictions = classifier.classify(test_data)
 
-    # Calculate accuracy
     correct = sum(p == t for p, t in zip(predictions, test_labels))
     accuracy = correct / len(test_labels)
     print(f"Accuracy on {data_type} test set: {accuracy:.4f}")
