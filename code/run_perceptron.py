@@ -5,6 +5,7 @@ import time
 import matplotlib.pyplot as plt
 import pickle
 import os
+import statistics
 
 DATA_TYPE = input("Enter dataset to run on ('digit' or 'face'): ").strip().lower()
 if DATA_TYPE not in ['digit', 'face']:
@@ -69,11 +70,13 @@ for p in percentages:
 
     avg_acc = sum(scores) / len(scores)
     duration = time.time() - start_time
+    std_dev = statistics.stdev([1 - acc for acc in scores])
 
     avg_accuracies.append(avg_acc)
     train_times.append(duration)
 
     print(f"  Avg Accuracy: {avg_acc:.4f}, Time: {duration:.2f} sec")
+    print(f"Standard Deviation of Error: {std_dev:.4f}")
 
 
     if p == 100:
