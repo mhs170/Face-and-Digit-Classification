@@ -81,7 +81,7 @@ def main():
         legal_labels = list(range(10))
         num_train = 5000
         num_test = 1000
-        epochs = 30
+        epochs = 10
         learn_rate = 0.001
     elif data_type == "face":
         width, height = 60, 70
@@ -137,7 +137,7 @@ def main():
         print(f"  Avg Accuracy: {avg_acc:.2f}%, Time: {duration:.2f} sec")
         avg_accuracies.append(avg_acc)
         avg_times.append(duration)
-
+    print(f"Total time for all runs: {sum(avg_times):.2f} sec")
     # Plot results
     plt.figure(figsize=(10, 4))
     plt.subplot(1, 2, 1)

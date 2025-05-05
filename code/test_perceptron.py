@@ -1,65 +1,38 @@
-# test_perceptron.py
-
+import pickle
 from perceptron import PerceptronClassifier
+from data_loader import load_data
 
-# Minimal util.Counter replacement
-import collections
+def evaluate_model(data_type):
+    if data_type == "digit":
+        weight_path = "../models/perceptron_digit.pkl"
+        test_img = "../data/digitdata/testimages"
+        test_lbl = "../data/digitdata/testlabels"
+        width, height = 28, 28
+        legal_labels = list(range(10))
+    elif data_type == "face":
+        weight_path = "../models/perceptron_face.pkl"
+        test_img = "../data/facedata/facedatatest"
+        test_lbl = "../data/facedata/facedatatestlabels"
+        width, height = 60, 70
+        legal_labels = [0, 1]
+    else:
+        raise ValueError("Data type must be 'digit' or 'face'")
 
-class Counter(collections.Counter):
-    def __mul__(self, other):
-        return sum(self[k] * other.get(k, 0) for k in self)
+    with open(test_lbl, 'r') as f:
+        num_test = len(f.readlines())
+    test_data, test_labels = load_data(test_img, test_lbl, num_test, width, height)
 
-    def __add__(self, other):
-        result = Counter(self)
-        for key in other:
-            result[key] += other[key]
-        return result
+    with open(weight_path, "rb") as f:
+        weights = pickle.load(f)
 
-    def __sub__(self, other):
-        result = Counter(self)
-        for key in other:
-            result[key] -= other[key]
-        return result
-
-    def argMax(self):
-        if len(self) == 0:
-            return None
-        return max(self.items(), key=lambda x: x[1])[0]
-
-# Patch perceptron to use this local Counter
-import perceptron
-perceptron.util = type("util", (), {"Counter": Counter})
-
-def create_dummy_data():
-    # Each datum is a Counter: {feature_name: value}
-    training_data = [
-        Counter({'x': 1, 'y': 1}),   # Class 0
-        Counter({'x': 1, 'y': 0}),   # Class 0
-        Counter({'x': 0, 'y': 1}),   # Class 1
-        Counter({'x': 0, 'y': 2}),   # Class 1
-    ]
-    training_labels = [0, 0, 1, 1]
-
-    test_data = [
-        Counter({'x': 1, 'y': 0}),   # Should be 0
-        Counter({'x': 0, 'y': 2}),   # Should be 1
-        Counter({'x': 1, 'y': 1}),   # Should lean toward 0
-    ]
-    return training_data, training_labels, test_data
-
-def main():
-    legalLabels = [0, 1]
-    max_iterations = 5
-
-    classifier = PerceptronClassifier(legalLabels, max_iterations)
-
-    train_data, train_labels, test_data = create_dummy_data()
-
-    # Dummy validation data (not used here)
-    classifier.train(train_data, train_labels, [], [])
-
+    classifier = PerceptronClassifier(legal_labels, max_iterations=5)
+    classifier.setWeights(weights)
     predictions = classifier.classify(test_data)
-    print("Predictions:", predictions)  # Expect output like: [0, 1, 0]
+
+    correct = sum(p == t for p, t in zip(predictions, test_labels))
+    accuracy = correct / len(test_labels)
+    print(f"Accuracy on {data_type} test set: {accuracy:.4f}")
 
 if __name__ == "__main__":
-    main()
+    evaluate_model("digit")
+    evaluate_model("face")

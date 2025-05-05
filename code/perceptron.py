@@ -7,76 +7,61 @@
 # For more info, see http://inst.eecs.berkeley.edu/~cs188/sp09/pacman.html
 
 # Perceptron implementation
+
 import util
 PRINT = True
 
 class PerceptronClassifier:
-  """
-  Perceptron classifier.
-  
-  Note that the variable 'datum' in this code refers to a counter of features
-  (not to a raw samples.Datum).
-  """
-  def __init__( self, legalLabels, max_iterations):
-    self.legalLabels = legalLabels
-    self.type = "perceptron"
-    self.max_iterations = max_iterations
-    self.weights = {}
-    for label in legalLabels:
-      self.weights[label] = util.Counter() # this is the data-structure you should use
-
-  def setWeights(self, weights):
-    assert len(weights) == len(self.legalLabels);
-    self.weights == weights;
-      
-  def train(self, trainingData, trainingLabels, validationData, validationLabels):
     """
-    The training loop for the perceptron passes through the training data several
-    times and updates the weight vector for each label based on classification errors.
+    Perceptron classifier.
     
-    Each datum is a util.Counter of features.
+    Note that the variable 'datum' in this code refers to a counter of features
+    (not to raw samples.Datum).
     """
-    self.features = list(trainingData[0].keys())  # useful for analysis or visualization
+    def __init__(self, legalLabels, max_iterations):
+        self.legalLabels = legalLabels
+        self.type = "perceptron"
+        self.max_iterations = max_iterations
+        self.weights = {}
+        for label in legalLabels:
+            self.weights[label] = util.Counter()
 
-    for iteration in range(self.max_iterations):
-        print("Starting iteration %d..." % iteration)
-        for i in range(len(trainingData)):
-            datum = trainingData[i]
-            true_label = trainingLabels[i]
+    def setWeights(self, weights):
+        assert len(weights) == len(self.legalLabels)
+        self.weights = weights
 
-            # Compute dot product for each label
+    def train(self, trainingData, trainingLabels, validationData, validationLabels):
+        self.features = list(trainingData[0].keys())
+
+        for iteration in range(self.max_iterations):
+            print("Starting iteration %d..." % iteration)
+            for i in range(len(trainingData)):
+                datum = trainingData[i]
+                true_label = trainingLabels[i]
+
+                # Compute the score for each label
+                scores = util.Counter()
+                for label in self.legalLabels:
+                    scores[label] = self.weights[label] * datum
+
+                predicted_label = scores.argMax()
+
+                # Update weights if prediction is wrong
+                if predicted_label != true_label:
+                    self.weights[true_label] += datum
+                    self.weights[predicted_label] -= datum
+
+    def classify(self, data):
+        guesses = []
+        for datum in data:
             scores = util.Counter()
             for label in self.legalLabels:
                 scores[label] = self.weights[label] * datum
+            guesses.append(scores.argMax())
+        return guesses
 
-            # Choose best guess based on highest score
-            predicted_label = scores.argMax()
-
-            # Update weights if the guess was incorrect
-            if predicted_label != true_label:
-                self.weights[true_label] += datum
-                self.weights[predicted_label] -= datum
-
-    
-  def classify(self, data ):
-    """
-    Classifies each datum as the label that most closely matches the prototype vector
-    for that label.  See the project description for details.
-    
-    Recall that a datum is a util.counter... 
-    """
-    guesses = []
-    for datum in data:
-      vectors = util.Counter()
-      for l in self.legalLabels:
-        #self.weights is what changes here, don't need to call this fun
-        vectors[l] = self.weights[l] * datum
-      guesses.append(vectors.argMax())
-    return guesses
-
-  
-  def findHighWeightFeatures(self, label):
-    feature_weights = self.weights[label]
-    sorted_features = sorted(feature_weights.items(), key=lambda item: item[1], reverse=True)
-    top_100_features = [feature for feature, weight in sorted_features[:100]]
-    return top_100_features
+    def findHighWeightFeatures(self, label):
+        """
+        Returns a list of the 100 features with the greatest weight for some label
+        """
+        return self.weights[label].sortedKeys()[:100]

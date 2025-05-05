@@ -1,14 +1,16 @@
-
 from perceptron import PerceptronClassifier
 from data_loader import load_data
 import random
 import time
 import matplotlib.pyplot as plt
-
+import pickle
+import os
+import statistics
 
 DATA_TYPE = input("Enter dataset to run on ('digit' or 'face'): ").strip().lower()
 if DATA_TYPE not in ['digit', 'face']:
     raise ValueError("Invalid input. Please enter 'digit' or 'face'.")
+
 
 MAX_ITERATIONS = 5
 RUNS_PER_PERCENTAGE = 5
@@ -28,6 +30,7 @@ elif DATA_TYPE == "face":
     test_img_path = '../data/facedata/facedatatest'
     test_lbl_path = '../data/facedata/facedatatestlabels'
     legal_labels = [0, 1]
+
 
 with open(train_lbl_path, 'r') as f:
     num_train = len(f.readlines())
@@ -67,11 +70,20 @@ for p in percentages:
 
     avg_acc = sum(scores) / len(scores)
     duration = time.time() - start_time
+    std_dev = statistics.stdev([1 - acc for acc in scores])
 
     avg_accuracies.append(avg_acc)
     train_times.append(duration)
 
     print(f"  Avg Accuracy: {avg_acc:.4f}, Time: {duration:.2f} sec")
+    print(f"Standard Deviation of Error: {std_dev:.4f}")
+
+
+    if p == 100:
+        os.makedirs("../models", exist_ok=True)
+        with open(f"../models/perceptron_{DATA_TYPE}.pkl", "wb") as f:
+            pickle.dump(classifier.weights, f)
+        print(f"Saved trained model weights to ../models/perceptron_{DATA_TYPE}.pkl")
 
 
 plt.figure(figsize=(10, 4))
@@ -91,5 +103,6 @@ plt.ylabel("Time (s)")
 plt.grid(True)
 
 plt.tight_layout()
+os.makedirs("../results", exist_ok=True)
 plt.savefig(f'../results/{DATA_TYPE}.png')
 plt.show()
